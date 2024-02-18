@@ -1,0 +1,87 @@
+﻿@model BTLab_test.Models.ViewModels.AddEmployeeRequest
+@{
+}
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            
+            function loadEmployees() {
+                $.ajax({
+                    url: "/AdminEmployee/GetAllEmployees",
+                    method: "GET",
+                    success: function (data) {
+                        
+                        $("#employees-table tbody").empty();
+
+                        
+                        for (var i = 0; i < data.length; i++) {
+                            var row = "<tr><td>" + data[i].firstName + "</td><td>" + data[i].lastName +
+                            "</td><td><button class='btn btn-danger btn-sm delete-button' data-id='" +
+                            data[i].id + "'>Удалить</button></td></tr>"; 
+                            $("#employees-table tbody").append(row);
+                        }
+                    }
+                });
+            }
+
+            
+            loadEmployees();
+
+            
+            $(document).on("click", ".delete-button", function () {
+                var employeeId = $(this).data("id");
+
+                
+                $.ajax({
+                    url: "/AdminEmployee/DeleteEmployee?id=" + employeeId,
+                    method: "POST",
+                    success: function () {
+                        
+                        loadEmployees();
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+<div class="bg-white bg-opacity-10 py-2">
+    <div class="container">
+        <h1>Добавить сотрудника</h1>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post">
+                <div class="mb-3">
+                    <label class="form-label">Имя</label>
+                    <input type="text" class="form-control" id="firstName" name="firstName" asp-for="FirstName" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Фамилия</label>
+                    <input type="text" class="form-control" id="lastName" name="lastName" asp-for="LastName" />
+                </div>
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-dark">Добавить</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <table class="table table-striped" id="employees-table">
+                <thead>
+                    <tr>
+                        <th>Имя</th>
+                        <th>Фамилия</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

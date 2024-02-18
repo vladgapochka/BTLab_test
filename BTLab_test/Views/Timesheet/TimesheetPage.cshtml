@@ -1,0 +1,122 @@
+﻿@model BTLab_test.Models.ViewModels.AddTimesheetRequest
+@{
+}
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.5/jquery.inputmask.min.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <script>
+        $(function () {
+            
+            $("#startDate").datepicker({
+                dateFormat: "dd.mm.yy"
+            });
+            
+            
+            $("#startDate").inputmask("99.99.9999");
+
+            
+            $('.delete-btn').click(function () {
+                var timesheetId = $(this).data('timesheet-id');
+                if (confirm('Вы уверены, что хотите удалить эту запись?')) {
+                    $.ajax({
+                        url: '/Timesheet/Delete/' + timesheetId,
+                        method: 'POST',
+                        success: function () {
+                            location.reload(); 
+                        },
+                        error: function (xhr, status, error) {
+                            alert('Ошибка при удалении записи: ' + error);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}
+
+
+<div class="bg-white  bg-opacity-10 py-2">
+    <div class="container">
+        <h1> Учет отсутствия сотрудников на рабочем месте</h1>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-3">
+            <form method="post" action="/Timesheet/Add">
+                <div class="mb-3">
+                    <label class="form-label">Сотрудник</label>
+                    <select class="form-select" id="employeeId" name="employeeId" asp-for="EmployeeId">
+                        @foreach (var employee in ViewBag.Employees)
+                        {
+                            <option value="@employee.Id">@employee.FirstName @employee.LastName</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Причина отсутствия</label>
+                    <select class="form-select" id="reason" name="reason" asp-for="Reason">
+                        <option value="1">Отпуск</option>
+                        <option value="2">Больничный</option>
+                        <option value="3">Прогул</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Дата начала</label>
+                    <input type="text" class="form-control" id="startDate" name="startDate" asp-for="StartDate" autocomplete="off">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Продолжительность</label>
+                    <input type="number" class="form-control" id="duration" name="duration" asp-for="Duration" />
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="discounted" name="discounted" asp-for="Discounted" />
+                    <label class="form-check-label" for="discounted">Учтено при оплате</label>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Комментарий</label>
+                    <input type="text" class="form-control" id="description" name="description" asp-for="Description" />
+                </div>
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-dark">Добавить</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-9">
+            <table class="table table-striped" id="timesheets-table">
+                <thead>
+                    <tr>
+                        <th>Сотрудник</th>
+                        <th>Причина отсутствия</th>
+                        <th>Дата начала</th>
+                        <th>Продолжительность</th>
+                        <th>Учтено при оплате</th>
+                        <th>Комментарий</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var timesheet in ViewBag.Timesheets)
+                    {
+                        <tr>
+                            <td>@timesheet.Employee.FirstName @timesheet.Employee.LastName</td>
+                            <td>@timesheet.Reason</td>
+                            <td>@timesheet.StartDate.ToShortDateString()</td>
+                            <td>@timesheet.Duration</td>
+                            <td>@(timesheet.Discounted ? "Да" : "Нет")</td>
+                            <td>@timesheet.Description</td>
+                            <td>
+                                <button class="btn btn-danger delete-btn" data-timesheet-id="@timesheet.Id">Удалить</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
